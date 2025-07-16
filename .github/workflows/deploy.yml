@@ -15,18 +15,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Copy files to EC2 using .scpignore to exclude .git and others
-      - name: Copy project files to EC2 (excluding .git, node_modules)
+      - name: Copy files via SSH to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "."
+          source: |
+            Dockerfile
+            docker-compose.yml
+            .dockerignore
+            package.json
+            package-lock.json
+            README.md
+            server.js
+            nodemon.json
+            components/
+            pages/
+            static/
+            server/
           target: "/home/${{ secrets.EC2_USER }}/nextjs-express"
-          overwrite: true
-          strip_components: 0
-          scp_ignore: ".scpignore"
 
       # Step 3: SSH into EC2 and run Docker Compose commands
       - name: SSH into EC2 and deploy with Docker Compose
