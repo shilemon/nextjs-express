@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: nextjs runner  # Replace with your actual self-hosted runner label
+    runs-on: "nextjs runner"  # Replace with your actual self-hosted runner label
 
     steps:
       - name: Print Docker Compose Version
