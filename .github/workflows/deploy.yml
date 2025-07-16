@@ -9,24 +9,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Print Docker Compose Version
         run: |
           docker-compose --version || docker compose version
 
-      - name: Navigate and Deploy App
+      - name: Build and Deploy App
         run: |
-          cd /home/ubuntu/nextjs-express
-
-          # Pull the latest changes from main
-          git stash || true
-          git checkout main
-          git pull origin main
-
-          # Build and run the Docker containers
+          # You are now in the repo root (inside the temp Actions dir)
           docker-compose up -d --build
-
-          # Clean up unused Docker images
           docker image prune -f
-
-          # Show running containers
           docker ps
