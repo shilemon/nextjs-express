@@ -11,18 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
+      # Step 1: Checkout the code from your GitHub repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Copy essential files and folders to EC2
-      - name: Copy files to EC2 via SCP
+      # Step 2: Copy necessary files to EC2 (avoiding .git, etc.)
+      - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: |
+          source: >
             Dockerfile
             docker-compose.yml
             .dockerignore
@@ -31,17 +31,16 @@ jobs:
             README.md
             server.js
             nodemon.json
-            components/
-            pages/
-            static/
-            server/
+            components
+            pages
+            static
+            server
           target: "/home/${{ secrets.EC2_USER }}/nextjs-express"
           overwrite: true
           strip_components: 0
-          rm: true
 
-      # Step 3: SSH into EC2 and deploy with Docker Compose
-      - name: SSH into EC2 and run Docker Compose
+      # Step 3: SSH into EC2 and run Docker Compose commands
+      - name: SSH into EC2 and deploy with Docker Compose
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -49,9 +48,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/nextjs-express
-            echo "🛑 Stopping old containers..."
+            echo "🔄 Stopping old containers (if any)..."
             docker-compose down || true
-            echo "⚙️ Building containers..."
+            echo "🐳 Building containers..."
             docker-compose build
             echo "🚀 Starting containers..."
             docker-compose up -d
