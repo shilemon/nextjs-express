@@ -2,33 +2,26 @@ name: Deploy Next.js + Express App
 
 on:
   push:
-    branches: [main]  # Trigger on push to main
+    branches: [main]
 
 jobs:
   deploy:
-    runs-on: [self-hosted, Linux, X64]  # Correct label set from your registered runner
+    runs-on: [self-hosted, Linux, X64]
 
     steps:
       - name: Print Docker Compose Version
         run: docker-compose --version
 
-      - name: Deploy App from Project Directory
+      - name: Checkout Code and Deploy App
         run: |
-          echo "🔁 Navigating to project directory"
           cd /home/docker/nextjs-express
 
-          echo "📦 Fetching latest code"
           git reset --hard
           git clean -fd
           git fetch origin
           git checkout main
           git pull origin main
 
-          echo "🐳 Building and starting containers"
           docker-compose up -d --build
-
-          echo "🧹 Pruning old images"
           docker image prune -f
-
-          echo "✅ Deployment complete. Running containers:"
           docker ps
