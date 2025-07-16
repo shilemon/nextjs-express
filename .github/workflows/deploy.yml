@@ -11,11 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the code from your GitHub repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Copy files via SSH to EC2
+      - name: Copy files to EC2 via SCP
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -35,9 +34,13 @@ jobs:
             static/
             server/
           target: "/home/${{ secrets.EC2_USER }}/nextjs-express"
+          strip_components: 0
+          overwrite: true
+          rm: true
+        working-directory: .
+          # 👆 Make sure this points to where the files really are
 
-      # Step 3: SSH into EC2 and run Docker Compose commands
-      - name: SSH into EC2 and deploy with Docker Compose
+      - name: SSH into EC2 and deploy
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -45,10 +48,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/nextjs-express
-            echo "🔄 Stopping old containers (if any)..."
+            echo "🔄 Stopping old containers..."
             docker-compose down || true
-            echo "🐳 Building containers..."
+            echo "🐳 Rebuilding..."
             docker-compose build
-            echo "🚀 Starting containers..."
+            echo "🚀 Starting..."
             docker-compose up -d
-            echo "✅ Deployment complete"
+            echo "✅ Deployment finished"
