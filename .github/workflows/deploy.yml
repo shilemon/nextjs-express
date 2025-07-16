@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout code
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Copy essential files and folders to EC2
       - name: Copy files to EC2 via SCP
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -34,13 +36,12 @@ jobs:
             static/
             server/
           target: "/home/${{ secrets.EC2_USER }}/nextjs-express"
-          strip_components: 0
           overwrite: true
+          strip_components: 0
           rm: true
-        working-directory: .
-          # 👆 Make sure this points to where the files really are
 
-      - name: SSH into EC2 and deploy
+      # Step 3: SSH into EC2 and deploy with Docker Compose
+      - name: SSH into EC2 and run Docker Compose
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -48,10 +49,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/nextjs-express
-            echo "🔄 Stopping old containers..."
+            echo "🛑 Stopping old containers..."
             docker-compose down || true
-            echo "🐳 Rebuilding..."
+            echo "⚙️ Building containers..."
             docker-compose build
-            echo "🚀 Starting..."
+            echo "🚀 Starting containers..."
             docker-compose up -d
-            echo "✅ Deployment finished"
+            echo "✅ Deployment complete"
